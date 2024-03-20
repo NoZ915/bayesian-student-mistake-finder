@@ -46,7 +46,7 @@ for(let i=1; i<=selectedTypes.length; i++){
 }
 
 const combinations = getAllPermutations(arrays, selectedTypes);
-console.log(combinations);
+// console.log(combinations);
 
 //------------------------------------------//
 // 算出combinations中每一組合的correct及wrong之機率值
@@ -66,7 +66,7 @@ const countErrorTypes = AllErrorTypes.reduce((obj, item) => {
     }
     return obj;
 }, {})
-console.log(countErrorTypes)
+// console.log(countErrorTypes)
 const combinationsAccuracy = combinations.map(combination => {
     let countErrorTypesValue = Object.values(countErrorTypes);
     let combinationValue = Object.values({...combination});
@@ -88,5 +88,6 @@ const combinationsAccuracy = combinations.map(combination => {
     let updatedCombination = {...combination, totalCorrectRate, totalWrongRate};
     return updatedCombination;
 })
-console.log(combinationsAccuracy)
+// console.log(combinationsAccuracy)
 
+export default combinationsAccuracy;

@@ -1,9 +1,9 @@
-import "./utils/tableProbability";
+import Problem from "./components/Problem";
 
 function App() {
   return (
     <div>
-      App!
+      <Problem />
     </div>
   );
 }
