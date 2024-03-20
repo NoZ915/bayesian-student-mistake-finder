@@ -1,4 +1,4 @@
-import "./utils/bayesian";
+import "./utils/tableProbability";
 
 function App() {
   return (
