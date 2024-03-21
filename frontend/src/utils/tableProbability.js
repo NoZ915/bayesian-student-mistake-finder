@@ -90,4 +90,4 @@ const combinationsAccuracy = combinations.map(combination => {
 })
 // console.log(combinationsAccuracy)
 
-export default combinationsAccuracy;
+export {combinationsAccuracy};

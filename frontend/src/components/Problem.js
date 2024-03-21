@@ -3,12 +3,12 @@ import { useState } from "react";
 import "../utils/tableProbability";
 import "../utils/currentProbability";
 import problems from "../fakeData/problems";
-import { 
-    Container, 
-    Box, 
-    Modal, 
-    Button, 
-    FormControl, 
+import {
+    Container,
+    Box,
+    Modal,
+    Button,
+    FormControl,
     FormLabel,
     RadioGroup,
     Radio,
@@ -28,10 +28,18 @@ const boxStyle = {
     px: 4,
     pb: 3,
 };
+const problemProbabilityStyle = {
+    display: "flex",
+    flexDirection: "column", 
+    justifyContent: "center",
+    mr: 3,
+    borderRight: 1,
+    pr: 3
+}
 
-function Problem() {
+function Problem({ problemProbability }) {
     const [currentProblem, setCurrentProblem] = useState(1);
-    const [selectedOption, setSelectedOption] = useState();
+    const [selectedOption, setSelectedOption] = useState("");
     const [showModal, setShowModal] = useState(false);
 
     const problem = problems[currentProblem - 1]?.description || {};
@@ -41,10 +49,15 @@ function Problem() {
     const optionD = problems[currentProblem - 1]?.options[3].text || {};
 
     const handleOptionChange = (event) => {
-        setSelectedOption(event.target.value);
+        if(event.target.value === selectedOption){
+            setSelectedOption("");
+        }else{
+            setSelectedOption(event.target.value);
+        }
     }
     const handleNextClick = () => {
         if (selectedOption) {
+            setSelectedOption(null);
             setCurrentProblem(currentProblem + 1);
         } else {
             setShowModal(true)
@@ -68,20 +81,24 @@ function Problem() {
     return (
         <>
             {(currentProblem <= problems.length) ? (
-                <Container sx={{display: "inline-flex", justifyContent: "center"}}>
+                <Container sx={{ display: "inline-flex", justifyContent: "center" }}>
+                    <Box sx={{ ...problemProbabilityStyle }}>
+                        <Box sx={{fontSize: 24}}>{`Problem 0${currentProblem}`}</Box>
+                        <Box>{`正確率：${problemProbability[currentProblem - 1].correct} %`}</Box>
+                        <Box>{`錯誤率：${problemProbability[currentProblem - 1].wrong} %`}</Box>
+                    </Box>
                     <FormControl>
                         <FormLabel sx={{ fontSize: 24 }}>{problem}</FormLabel>
                         <RadioGroup
                             row
                             value={selectedOption}
-                            onChange={handleOptionChange}
                         >
-                            <FormControlLabel value="optionA" control={<Radio />} label={optionA} />
-                            <FormControlLabel value="optionB" control={<Radio />} label={optionB} />
-                            <FormControlLabel value="optionC" control={<Radio />} label={optionC} />
-                            <FormControlLabel value="optionD" control={<Radio />} label={optionD} />
+                            <FormControlLabel value="optionA" control={<Radio onClick={handleOptionChange} />} label={optionA} />
+                            <FormControlLabel value="optionB" control={<Radio onClick={handleOptionChange} />} label={optionB} />
+                            <FormControlLabel value="optionC" control={<Radio onClick={handleOptionChange} />} label={optionC} />
+                            <FormControlLabel value="optionD" control={<Radio onClick={handleOptionChange} />} label={optionD} />
                         </RadioGroup>
-                        <Button sx={{width: 30, m: "auto", mt: 2}} variant="contained" onClick={handleNextClick}>Next</Button>
+                        <Button sx={{ width: 30, m: "auto", mt: 2 }} variant="contained" onClick={handleNextClick}>Next</Button>
                     </FormControl>
                 </Container>
             )
