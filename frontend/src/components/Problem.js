@@ -30,35 +30,56 @@ const boxStyle = {
 };
 const problemProbabilityStyle = {
     display: "flex",
-    flexDirection: "column", 
+    flexDirection: "column",
     justifyContent: "center",
     mr: 3,
     borderRight: 1,
     pr: 3
 }
 
-function Problem({ problemProbability }) {
-    const [currentProblem, setCurrentProblem] = useState(1);
+function Problem({
+    problemProbability,
+    currentProblem,
+    setCurrentProblem,
+    problemDescription,
+    optionA,
+    optionB,
+    optionC,
+    optionD,
+    // setCurrentOptionName,
+    update
+}) {
     const [selectedOption, setSelectedOption] = useState("");
     const [showModal, setShowModal] = useState(false);
 
-    const problem = problems[currentProblem - 1]?.description || {};
-    const optionA = problems[currentProblem - 1]?.options[0].text || {};
-    const optionB = problems[currentProblem - 1]?.options[1].text || {};
-    const optionC = problems[currentProblem - 1]?.options[2].text || {};
-    const optionD = problems[currentProblem - 1]?.options[3].text || {};
+    //偵測使用者勾選的選項之errorType > selectedErrorType
+    const [currentOptionName, setCurrentOptionName] = useState(0);
+    function selected() {
+        let problemOptions, selectedAnswer, selectedErrorType;
+        problemOptions = problems[currentProblem - 1].options;
+        selectedAnswer = problemOptions.filter(e => {
+            return e.name === currentOptionName;
+        })
+        selectedErrorType = selectedAnswer[0]?.errorType;
+        console.log(currentOptionName)
+        update(selectedErrorType)
+    }
+
+
 
     const handleOptionChange = (event) => {
-        if(event.target.value === selectedOption){
+        if (event.target.value === selectedOption) {
             setSelectedOption("");
-        }else{
+        } else {
             setSelectedOption(event.target.value);
         }
     }
     const handleNextClick = () => {
         if (selectedOption) {
+            setCurrentOptionName(selectedOption);
             setSelectedOption(null);
             setCurrentProblem(currentProblem + 1);
+            selected();
         } else {
             setShowModal(true)
         }
@@ -83,20 +104,20 @@ function Problem({ problemProbability }) {
             {(currentProblem <= problems.length) ? (
                 <Container sx={{ display: "inline-flex", justifyContent: "center" }}>
                     <Box sx={{ ...problemProbabilityStyle }}>
-                        <Box sx={{fontSize: 24}}>{`Problem 0${currentProblem}`}</Box>
+                        <Box sx={{ fontSize: 24 }}>{`Problem 0${currentProblem}`}</Box>
                         <Box>{`正確率：${problemProbability[currentProblem - 1].correct} %`}</Box>
                         <Box>{`錯誤率：${problemProbability[currentProblem - 1].wrong} %`}</Box>
                     </Box>
                     <FormControl>
-                        <FormLabel sx={{ fontSize: 24 }}>{problem}</FormLabel>
+                        <FormLabel sx={{ fontSize: 24 }}>{problemDescription}</FormLabel>
                         <RadioGroup
                             row
                             value={selectedOption}
                         >
-                            <FormControlLabel value="optionA" control={<Radio onClick={handleOptionChange} />} label={optionA} />
-                            <FormControlLabel value="optionB" control={<Radio onClick={handleOptionChange} />} label={optionB} />
-                            <FormControlLabel value="optionC" control={<Radio onClick={handleOptionChange} />} label={optionC} />
-                            <FormControlLabel value="optionD" control={<Radio onClick={handleOptionChange} />} label={optionD} />
+                            <FormControlLabel value={optionA.name} control={<Radio onClick={handleOptionChange} />} label={optionA.text} />
+                            <FormControlLabel value={optionB.name} control={<Radio onClick={handleOptionChange} />} label={optionB.text} />
+                            <FormControlLabel value={optionC.name} control={<Radio onClick={handleOptionChange} />} label={optionC.text} />
+                            <FormControlLabel value={optionD.name} control={<Radio onClick={handleOptionChange} />} label={optionD.text} />
                         </RadioGroup>
                         <Button sx={{ width: 30, m: "auto", mt: 2 }} variant="contained" onClick={handleNextClick}>Next</Button>
                     </FormControl>
