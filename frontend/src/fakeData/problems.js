@@ -42,7 +42,7 @@ const problems = [
             {   
                 name: "C",
                 text: "is watching",
-                errorType: 4
+                errorType: 1
             },
             {   
                 name: "D",

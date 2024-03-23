@@ -12,7 +12,8 @@ import errorTypes from "../fakeData/errorTypes";
 import problems from "../fakeData/problems";
 import Problem from "../components/Problem";
 import ErrorTypesFamiliarity from "../components/ErrorTypesFamiliarity";
-import { useState } from "react";
+import updatedCombinationsAccuracy from "../utils/tableProbability";
+import { useState, useEffect } from "react";
 
 const containerStyle = {
     mt: 2,
@@ -45,25 +46,34 @@ function ProblemPage() {
     const optionD = problems[currentProblem - 1]?.options[3] || {};
 
     //偵測使用者勾選的選項之errorType > selectedErrorType
-    // const [currentOptionName, setCurrentOptionName] = useState(0);
-    // let problemOptions, selectedOption, selectedErrorType;
-    // if (problems[currentProblem - 2]) {
-    //     problemOptions = problems[currentProblem - 2].options;
-    //     selectedOption = problemOptions.filter(e => {
-    //         return e.name === currentOptionName;
-    //     })
-    //     selectedErrorType = selectedOption[0]?.errorType;
-    // }
+    const [currentOptionName, setCurrentOptionName] = useState(0);
+    const [selectedErrorType, setSelectedErrorType] = useState();
+    useEffect(() => {
+        if (currentOptionName) {
+            if (problems[currentProblem - 2]) {
+                const problemOptions = problems[currentProblem - 2].options;
+                const selectedAnswer = problemOptions.find(e => e.name === currentOptionName);
+                const newSelectedErrorType = selectedAnswer?.errorType;
+                setSelectedErrorType(`${currentProblem - 1}-${newSelectedErrorType}`);
+            }
+        }
+    }, [currentProblem]);
+    useEffect(() => {
+        if(selectedErrorType){
+            update(selectedErrorType);
+        }
+    }, [selectedErrorType])
 
     // error type familiarity
     const [errorTypesFamiliarity, setErrorTypesFamiliarity] = useState(
-        Array.from({length: errorTypes.length}, () => ({
+        Array.from({ length: errorTypes.length }, (_, index) => ({
+            ...errorTypes[index],
             noIdentity: 1 / 3,
             partialIdentity: 1 / 3,
             fullIdentity: 1 / 3
         }))
-    )
-    console.log(errorTypesFamiliarity)
+    );
+    // console.log(errorTypesFamiliarity)
     // const errorTypesFamiliarity = [];
     // for (let i = 1; i <= errorTypes.length; i++) {
     //     errorTypesFamiliarity.push({
@@ -107,16 +117,31 @@ function ProblemPage() {
     )
 
     // 根據使用者選擇的error type各個情況機率以及題目正確錯誤率做更新
-    function update(selectedErrorType){
-        if (selectedErrorType === 0) {
+    function update(selectedErrorType) {
+        if (selectedErrorType === "B00") {
             //使用者選擇正確
             // ......
         } else {
-            const updated = [
-                ...errorTypesFamiliarity,
-                // errorTypesFamiliarity[selectedErrorType-1].noIdentity = 0
-            ]
-            setErrorTypesFamiliarity(updated)
+            const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
+            updatedErrorTypesFamiliarity[selectedErrorType.split('B0') - 1].noIdentity = 0;
+
+            const currentTableProbability = updatedCombinationsAccuracy[currentProblem - 2].combinationsAccuracy;
+            // console.log(currentTableProbability)
+            const errorTypeString = `${selectedErrorType}`
+            const noIdentityRows = currentTableProbability.filter((row) => {
+                return row[errorTypeString] === "noIdentity"
+            })
+            const updatedNoIdentityRows = noIdentityRows.map((row) => {
+                return row
+            })
+            console.log(errorTypeString)
+            console.log(noIdentityRows)
+
+            // 計算
+            // const updatedNoIdentity = 
+
+            setErrorTypesFamiliarity(updatedErrorTypesFamiliarity);
+            // console.log(updatedErrorTypesFamiliarity)
         }
     }
 
@@ -133,8 +158,9 @@ function ProblemPage() {
                     optionB={optionB}
                     optionC={optionC}
                     optionD={optionD}
-                    // setCurrentOptionName={setCurrentOptionName}
-                    update={update} 
+                    setCurrentOptionName={setCurrentOptionName}
+                    update={update}
+                    selectedErrorType={selectedErrorType}
                 />
             </Container>
             <Container sx={{ ...containerStyle }}>

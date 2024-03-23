@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import "../utils/tableProbability";
 import "../utils/currentProbability";
@@ -46,26 +46,12 @@ function Problem({
     optionB,
     optionC,
     optionD,
-    // setCurrentOptionName,
-    update
+    setCurrentOptionName,
+    update,
+    selectedErrorType
 }) {
     const [selectedOption, setSelectedOption] = useState("");
     const [showModal, setShowModal] = useState(false);
-
-    //偵測使用者勾選的選項之errorType > selectedErrorType
-    const [currentOptionName, setCurrentOptionName] = useState(0);
-    function selected() {
-        let problemOptions, selectedAnswer, selectedErrorType;
-        problemOptions = problems[currentProblem - 1].options;
-        selectedAnswer = problemOptions.filter(e => {
-            return e.name === currentOptionName;
-        })
-        selectedErrorType = selectedAnswer[0]?.errorType;
-        console.log(currentOptionName)
-        update(selectedErrorType)
-    }
-
-
 
     const handleOptionChange = (event) => {
         if (event.target.value === selectedOption) {
@@ -79,7 +65,6 @@ function Problem({
             setCurrentOptionName(selectedOption);
             setSelectedOption(null);
             setCurrentProblem(currentProblem + 1);
-            selected();
         } else {
             setShowModal(true)
         }

@@ -25,7 +25,7 @@ function getAllPermutations(arrays, selectedTypes) {
     return result;
 }
 
-const updatedProblems = problems.map(problem => {
+const updatedCombinationsAccuracy = problems.map(problem => {
     //------------------------------------------//
     // 去遍歷problems中所有的problem
     // 再看problem裡的四個option之errorType有哪些（不重複，correct選項不放入）
@@ -92,6 +92,6 @@ const updatedProblems = problems.map(problem => {
     return {...problem, combinationsAccuracy}
 })
 
-// console.log(updatedProblems);
+console.log(updatedCombinationsAccuracy);
 
-export {updatedProblems};
+export default updatedCombinationsAccuracy;
