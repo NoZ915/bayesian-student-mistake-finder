@@ -12,8 +12,9 @@ import errorTypes from "../fakeData/errorTypes";
 import problems from "../fakeData/problems";
 import Problem from "../components/Problem";
 import ErrorTypesFamiliarity from "../components/ErrorTypesFamiliarity";
-import updatedCombinationsAccuracy from "../utils/tableProbability";
+import { updatedCombinationsAccuracy, problemErrorTypeAmount } from "../utils/tableProbability";
 import { useState, useEffect } from "react";
+import { forEach } from "async";
 
 const containerStyle = {
     mt: 2,
@@ -59,7 +60,7 @@ function ProblemPage() {
         }
     }, [currentProblem]);
     useEffect(() => {
-        if(selectedErrorType){
+        if (selectedErrorType) {
             update(selectedErrorType);
         }
     }, [selectedErrorType])
@@ -118,24 +119,71 @@ function ProblemPage() {
 
     // 根據使用者選擇的error type各個情況機率以及題目正確錯誤率做更新
     function update(selectedErrorType) {
-        if (selectedErrorType === "B00") {
+        if (selectedErrorType.split('-')[1] === 0) {
             //使用者選擇正確
             // ......
         } else {
             const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
-            updatedErrorTypesFamiliarity[selectedErrorType.split('B0') - 1].noIdentity = 0;
+            // updatedErrorTypesFamiliarity[selectedErrorType.split('-')[1] - 1].noIdentity = 0;
+            // console.log(selectedErrorType.split('-')[1])
+
 
             const currentTableProbability = updatedCombinationsAccuracy[currentProblem - 2].combinationsAccuracy;
             // console.log(currentTableProbability)
-            const errorTypeString = `${selectedErrorType}`
+            const errorTypeString = `B0${selectedErrorType.split('-')[1]}`
             const noIdentityRows = currentTableProbability.filter((row) => {
                 return row[errorTypeString] === "noIdentity"
             })
-            const updatedNoIdentityRows = noIdentityRows.map((row) => {
-                return row
+            let rate = 0;
+            let arr = [];
+            let noIdentityWithProb = noIdentityRows.map((obj) => {
+                if (problems[currentProblem - 2]) {
+                    const errorTypeAmount = problemErrorTypeAmount(problems[currentProblem - 2])
+                    const onlyErrorTypes = Object.keys(obj).slice(0, errorTypeAmount);
+                    // console.log(Object.keys(obj).slice(0,errorTypeAmount))
+                    let errString = []; //使用者沒選擇的error type
+                    onlyErrorTypes.forEach(err => {
+                        // console.log(err)
+                        // console.log(`User selected B0${selectedErrorType.split('-')[1]}`)
+                        if (err !== `B0${selectedErrorType.split('-')[1]}`) {
+                            // console.log(err)
+                            errString.push(err);
+                        }
+                        // console.log(`This is errString: ${errString}`)
+                        // console.log(`------------------------------------`)
+                    })
+                    errString.forEach(err => {
+                        // console.log(errorTypesFamiliarity[err.split("B0")[1] - 1])
+                        let errType = obj[err]
+                        obj[err] = errorTypesFamiliarity[err.split("B0")[1] - 1][errType]
+                    })
+                    // errString.forEach(err => {
+
+
+                    //     console.log(err)
+                    //     console.log(`${[err]}: `+obj[err])
+                    //     console.log(`obj.totalWrongRate: `+obj.totalWrongRate)
+                    //     console.log(`--------------------------------------`)
+                    // })
+                    // let BPosteriorProb = 
+                    // console.log(obj[errString])
+                    // console.log(errString.split("B0")[1])
+                    // console.log(errorTypesFamiliarity[errString.split("B0")[1] - 1])
+                    // obj[errString] = errorTypesFamiliarity
+                    // console.log(obj)
+                    // console.log(obj)
+                }
+                delete obj.totalCorrectRate;
+                Object.values(obj).forEach(num => {
+                    if(typeof num === "number"){
+                        console.log(num)
+                    }
+                })
+                console.log(obj)
+                return obj
             })
-            console.log(errorTypeString)
-            console.log(noIdentityRows)
+            // console.log(errorTypeString)
+            // console.log(noIdentityRows)
 
             // 計算
             // const updatedNoIdentity = 

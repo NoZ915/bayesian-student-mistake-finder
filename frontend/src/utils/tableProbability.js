@@ -92,6 +92,17 @@ const updatedCombinationsAccuracy = problems.map(problem => {
     return {...problem, combinationsAccuracy}
 })
 
-console.log(updatedCombinationsAccuracy);
+function problemErrorTypeAmount(problem){
+    const selectedTypes = [];
+    problem.options.forEach(option => {
+        if(selectedTypes.indexOf(`B0${option.errorType}`) === -1 && option.errorType !== 0){
+            selectedTypes.push(`B0${option.errorType}`);
+        }
+    })
+    return selectedTypes.length
+}
 
-export default updatedCombinationsAccuracy;
+export {
+    updatedCombinationsAccuracy,
+    problemErrorTypeAmount
+};
