@@ -123,25 +123,21 @@ function ProblemPage() {
             //使用者選擇正確
             // ......
         } else {
-            const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
-            // updatedErrorTypesFamiliarity[selectedErrorType.split('-')[1] - 1].noIdentity = 0;
-            // console.log(selectedErrorType.split('-')[1])
-
-
             const currentTableProbability = updatedCombinationsAccuracy[currentProblem - 2].combinationsAccuracy;
             // console.log(currentTableProbability)
             const errorTypeString = `B0${selectedErrorType.split('-')[1]}`
             const noIdentityRows = currentTableProbability.filter((row) => {
                 return row[errorTypeString] === "noIdentity"
             })
-            let rate = 0;
             let arr = [];
-            let noIdentityWithProb = noIdentityRows.map((obj) => {
+            let sum = 0;
+            let noIdentity1arg = noIdentityRows.map((obj) => {
                 if (problems[currentProblem - 2]) {
                     const errorTypeAmount = problemErrorTypeAmount(problems[currentProblem - 2])
                     const onlyErrorTypes = Object.keys(obj).slice(0, errorTypeAmount);
                     // console.log(Object.keys(obj).slice(0,errorTypeAmount))
                     let errString = []; //使用者沒選擇的error type
+                    let product = 1;
                     onlyErrorTypes.forEach(err => {
                         // console.log(err)
                         // console.log(`User selected B0${selectedErrorType.split('-')[1]}`)
@@ -157,36 +153,30 @@ function ProblemPage() {
                         let errType = obj[err]
                         obj[err] = errorTypesFamiliarity[err.split("B0")[1] - 1][errType]
                     })
-                    // errString.forEach(err => {
-
-
-                    //     console.log(err)
-                    //     console.log(`${[err]}: `+obj[err])
-                    //     console.log(`obj.totalWrongRate: `+obj.totalWrongRate)
-                    //     console.log(`--------------------------------------`)
-                    // })
-                    // let BPosteriorProb = 
-                    // console.log(obj[errString])
-                    // console.log(errString.split("B0")[1])
-                    // console.log(errorTypesFamiliarity[errString.split("B0")[1] - 1])
-                    // obj[errString] = errorTypesFamiliarity
-                    // console.log(obj)
-                    // console.log(obj)
+                    delete obj.totalCorrectRate;
+                    console.log(obj);
+                    Object.values(obj).forEach(num => {
+                        console.log(num);
+                        if (typeof num === "number") {
+                            product *= num;
+                        }
+                    })
+                    sum += product; // 將每次計算的結果加到總和中
+                    // console.log(`product is ` + product);
+                    // console.log(`sum is ` + sum);
+                    product = 1; // 重置 product 為 1，以便下一次迭代
                 }
-                delete obj.totalCorrectRate;
-                Object.values(obj).forEach(num => {
-                    if(typeof num === "number"){
-                        console.log(num)
-                    }
-                })
-                console.log(obj)
-                return obj
+                return sum;
             })
-            // console.log(errorTypeString)
+            console.log(noIdentity1arg)
             // console.log(noIdentityRows)
 
             // 計算
-            // const updatedNoIdentity = 
+            const updatedNoIdentity = (noIdentity1arg[noIdentity1arg.length - 1] * errorTypesFamiliarity[selectedErrorType.split('-')[1] - 1].noIdentity) / problemProbability[currentProblem - 2].wrong || 1
+
+            const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
+            updatedErrorTypesFamiliarity[selectedErrorType.split('-')[1] - 1].noIdentity = updatedNoIdentity;
+            // console.log(selectedErrorType.split('-')[1])
 
             setErrorTypesFamiliarity(updatedErrorTypesFamiliarity);
             // console.log(updatedErrorTypesFamiliarity)
