@@ -12,7 +12,7 @@ import errorTypes from "../fakeData/errorTypes";
 import problems from "../fakeData/problems";
 import Problem from "../components/Problem";
 import ErrorTypesFamiliarity from "../components/ErrorTypesFamiliarity";
-import { updatedCombinationsAccuracy, problemErrorTypeAmount } from "../utils/tableProbability";
+import { updatedCombinationsAccuracy, problemErrorType } from "../utils/tableProbability";
 import { useState, useEffect } from "react";
 import { forEach } from "async";
 
@@ -74,16 +74,7 @@ function ProblemPage() {
             fullIdentity: 1 / 3
         }))
     );
-    // console.log(errorTypesFamiliarity)
-    // const errorTypesFamiliarity = [];
-    // for (let i = 1; i <= errorTypes.length; i++) {
-    //     errorTypesFamiliarity.push({
-    //         ...errorTypes[i - 1],
-    //         noIdentity: 1 / 3,
-    //         partialIdentity: 1 / 3,
-    //         fullIdentity: 1 / 3
-    //     })
-    // }
+
     const renderedErrorType = errorTypesFamiliarity.map((errorTypeFamiliarity, index) => {
         const noIdentity = Math.round(errorTypeFamiliarity.noIdentity * 10000) / 100;
         const partialIdentity = Math.round(errorTypeFamiliarity.partialIdentity * 10000) / 100;
@@ -119,67 +110,56 @@ function ProblemPage() {
 
     // 根據使用者選擇的error type各個情況機率以及題目正確錯誤率做更新
     function update(selectedErrorType) {
-        if (selectedErrorType.split('-')[1] === 0) {
-            //使用者選擇正確
-            // ......
-        } else {
+        if (Number(selectedErrorType.split('-')[1]) !== 0) {
             const currentTableProbability = updatedCombinationsAccuracy[currentProblem - 2].combinationsAccuracy;
-            // console.log(currentTableProbability)
-            const errorTypeString = `B0${selectedErrorType.split('-')[1]}`
-            const noIdentityRows = currentTableProbability.filter((row) => {
-                return row[errorTypeString] === "noIdentity"
-            })
-            let arr = [];
+            const problemErrorTypes = problemErrorType(problems[currentProblem - 2]);
+            let product = 1;
             let sum = 0;
-            let noIdentity1arg = noIdentityRows.map((obj) => {
-                if (problems[currentProblem - 2]) {
-                    const errorTypeAmount = problemErrorTypeAmount(problems[currentProblem - 2])
-                    const onlyErrorTypes = Object.keys(obj).slice(0, errorTypeAmount);
-                    // console.log(Object.keys(obj).slice(0,errorTypeAmount))
-                    let errString = []; //使用者沒選擇的error type
-                    let product = 1;
-                    onlyErrorTypes.forEach(err => {
-                        // console.log(err)
-                        // console.log(`User selected B0${selectedErrorType.split('-')[1]}`)
-                        if (err !== `B0${selectedErrorType.split('-')[1]}`) {
-                            // console.log(err)
-                            errString.push(err);
-                        }
-                        // console.log(`This is errString: ${errString}`)
-                        // console.log(`------------------------------------`)
-                    })
-                    errString.forEach(err => {
-                        // console.log(errorTypesFamiliarity[err.split("B0")[1] - 1])
-                        let errType = obj[err]
-                        obj[err] = errorTypesFamiliarity[err.split("B0")[1] - 1][errType]
-                    })
-                    delete obj.totalCorrectRate;
-                    console.log(obj);
-                    Object.values(obj).forEach(num => {
-                        console.log(num);
+            const noIdentity1arg = problemErrorTypes.map(err => {
+                const noIdentityRows = currentTableProbability.filter(row => {
+                    return row[err] === "noIdentity";
+                })
+                let othersNoIdentityRows = []; //除了遍歷當下的其他err
+                problemErrorTypes.forEach(othersErr => {
+                    if (othersErr !== err) {
+                        othersNoIdentityRows.push(othersErr);
+                    }
+                })
+                const updatedNoIdentityRows = noIdentityRows.map(row => {
+                    const updatedRow = { ...row }; // 複製原始物件
+                    othersNoIdentityRows.forEach(othersErr => {
+                        const errType = updatedRow[othersErr];
+                        updatedRow[othersErr] = errorTypesFamiliarity[othersErr.split("B0")[1] - 1][errType];
+                    });
+                    return updatedRow;
+                });
+
+                sum = 0;
+                updatedNoIdentityRows.forEach(row => {
+                    delete row.totalCorrectRate;
+                    Object.values(row).forEach(num => {
                         if (typeof num === "number") {
                             product *= num;
                         }
                     })
                     sum += product; // 將每次計算的結果加到總和中
-                    // console.log(`product is ` + product);
-                    // console.log(`sum is ` + sum);
                     product = 1; // 重置 product 為 1，以便下一次迭代
-                }
+                })
                 return sum;
             })
-            console.log(noIdentity1arg)
-            // console.log(noIdentityRows)
+            console.log(noIdentity1arg);
+            let index = -1;
+            problemErrorTypes.forEach(err => {
+                index++;
+                const newNoIdentity = (noIdentity1arg[index] * errorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity) / problemProbability[currentProblem - 2].wrong || 1;
+                console.log(`sum: ` + noIdentity1arg[index]);
+                console.log(`noIdentity: ` + errorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity);
+                console.log(`相乘:` + noIdentity1arg[index] * errorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity);
+                const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
+                updatedErrorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity = newNoIdentity;
+                setErrorTypesFamiliarity(updatedErrorTypesFamiliarity);
+            })
 
-            // 計算
-            const updatedNoIdentity = (noIdentity1arg[noIdentity1arg.length - 1] * errorTypesFamiliarity[selectedErrorType.split('-')[1] - 1].noIdentity) / problemProbability[currentProblem - 2].wrong || 1
-
-            const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
-            updatedErrorTypesFamiliarity[selectedErrorType.split('-')[1] - 1].noIdentity = updatedNoIdentity;
-            // console.log(selectedErrorType.split('-')[1])
-
-            setErrorTypesFamiliarity(updatedErrorTypesFamiliarity);
-            // console.log(updatedErrorTypesFamiliarity)
         }
     }
 

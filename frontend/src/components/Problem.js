@@ -90,8 +90,8 @@ function Problem({
                 <Container sx={{ display: "inline-flex", justifyContent: "center" }}>
                     <Box sx={{ ...problemProbabilityStyle }}>
                         <Box sx={{ fontSize: 24 }}>{`Problem 0${currentProblem}`}</Box>
-                        <Box>{`正確率：${problemProbability[currentProblem - 1].correct} %`}</Box>
-                        <Box>{`錯誤率：${problemProbability[currentProblem - 1].wrong} %`}</Box>
+                        <Box>{`正確率：${(problemProbability[currentProblem - 1].correct * 10000) / 100} %`}</Box>
+                        <Box>{`錯誤率：${(problemProbability[currentProblem - 1].wrong * 10000) / 100} %`}</Box>
                     </Box>
                     <FormControl>
                         <FormLabel sx={{ fontSize: 24 }}>{problemDescription}</FormLabel>

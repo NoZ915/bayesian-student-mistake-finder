@@ -32,7 +32,7 @@ const updatedCombinationsAccuracy = problems.map(problem => {
     // push進selectedTypes
     const selectedTypes = [];
     problem.options.forEach(option => {
-        if(selectedTypes.indexOf(`B0${option.errorType}`) === -1 && option.errorType !== 0){
+        if (selectedTypes.indexOf(`B0${option.errorType}`) === -1 && option.errorType !== 0) {
             selectedTypes.push(`B0${option.errorType}`);
         }
     })
@@ -41,7 +41,7 @@ const updatedCombinationsAccuracy = problems.map(problem => {
     // 看有幾個errorType
     // arrays陣列就會有幾個['noIdentity', 'partialIdentity', 'fullIdentity']
     const arrays = [];
-    for(let i=1; i<=selectedTypes.length; i++){
+    for (let i = 1; i <= selectedTypes.length; i++) {
         arrays.push(['noIdentity', 'partialIdentity', 'fullIdentity']);
     }
 
@@ -54,14 +54,14 @@ const updatedCombinationsAccuracy = problems.map(problem => {
     // 先算出B01, B04各佔錯誤選項的比例 > 用reduce算出
     const AllErrorTypes = [];
     problem.options.forEach(option => {
-        if(option.errorType !== 0){
+        if (option.errorType !== 0) {
             AllErrorTypes.push(`B0${option.errorType}`);
         }
     })
     const countErrorTypes = AllErrorTypes.reduce((obj, item) => {
-        if(item in obj){
+        if (item in obj) {
             obj[item]++;
-        }else{
+        } else {
             obj[item] = 1;
         }
         return obj;
@@ -69,40 +69,40 @@ const updatedCombinationsAccuracy = problems.map(problem => {
     // console.log(countErrorTypes)
     const combinationsAccuracy = combinations.map(combination => {
         let countErrorTypesValue = Object.values(countErrorTypes);
-        let combinationValue = Object.values({...combination});
+        let combinationValue = Object.values({ ...combination });
 
         let totalWrongRate = 0;
         let totalCorrectRate = 0;
-        for(let i=0; i<=countErrorTypesValue.length-1; i++){
+        for (let i = 0; i <= countErrorTypesValue.length - 1; i++) {
             let errorTypeState = combinationValue[i];
             let wrongRate = 0;
             let factor;
-            if(errorTypeState === "noIdentity") factor = 1;
-            else if(errorTypeState === "partialIdentity") factor = 1/2;
-            else if(errorTypeState === "fullIdentity") factor = 0;
-            wrongRate = (countErrorTypesValue[i]/3) * factor;
+            if (errorTypeState === "noIdentity") factor = 1;
+            else if (errorTypeState === "partialIdentity") factor = 1 / 2;
+            else if (errorTypeState === "fullIdentity") factor = 0;
+            wrongRate = (countErrorTypesValue[i] / 3) * factor;
             totalWrongRate += wrongRate;
         }
         totalCorrectRate = 1 - totalWrongRate;
 
-        let updatedCombination = {...combination, totalCorrectRate, totalWrongRate};
+        let updatedCombination = { ...combination, totalCorrectRate, totalWrongRate };
         return updatedCombination;
     })
 
-    return {...problem, combinationsAccuracy}
+    return { ...problem, combinationsAccuracy }
 })
 
-function problemErrorTypeAmount(problem){
+function problemErrorType(problem) {
     const selectedTypes = [];
     problem.options.forEach(option => {
-        if(selectedTypes.indexOf(`B0${option.errorType}`) === -1 && option.errorType !== 0){
+        if (selectedTypes.indexOf(`B0${option.errorType}`) === -1 && option.errorType !== 0) {
             selectedTypes.push(`B0${option.errorType}`);
         }
     })
-    return selectedTypes.length
+    return selectedTypes;
 }
 
 export {
     updatedCombinationsAccuracy,
-    problemErrorTypeAmount
+    problemErrorType
 };
