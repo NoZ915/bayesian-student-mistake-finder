@@ -61,6 +61,7 @@ function ProblemPage() {
     }, [currentProblem]);
     useEffect(() => {
         if (selectedErrorType) {
+            updateProblem();
             update(selectedErrorType);
         }
     }, [selectedErrorType])
@@ -80,7 +81,7 @@ function ProblemPage() {
         const partialIdentity = Math.round(errorTypeFamiliarity.partialIdentity * 10000) / 100;
         const fullIdentity = Math.round(errorTypeFamiliarity.fullIdentity * 10000) / 100;
         return (
-            <Grid item={true} xs={2} sm={3} key={index}>
+            <Grid item={true} xs={2} sm={4} key={index}>
                 <List sx={style}>
                     <Typography variant="h5" sx={{ p: 1 }} >
                         {`B0${index + 1}`}
@@ -107,6 +108,16 @@ function ProblemPage() {
             wrong: 0.5
         }))
     )
+    function updateProblem() {
+        if (Number(selectedErrorType.split('-')[1]) === 0) {
+
+        } else {
+
+        }
+
+        const updatedProblemProbability = [...problemProbability];
+        // updatedProblemProbability[currentProblem - 2].correct = 
+    }
 
     // 根據使用者選擇的error type各個情況機率以及題目正確錯誤率做更新
     function update(selectedErrorType) {
@@ -115,6 +126,7 @@ function ProblemPage() {
             const problemErrorTypes = problemErrorType(problems[currentProblem - 2]);
             let product = 1;
             let sum = 0;
+            //noIdentity
             const noIdentity1arg = problemErrorTypes.map(err => {
                 const noIdentityRows = currentTableProbability.filter(row => {
                     return row[err] === "noIdentity";
@@ -147,16 +159,88 @@ function ProblemPage() {
                 })
                 return sum;
             })
-            console.log(noIdentity1arg);
+
+            //partialIdentity
+            const partialIdentity1arg = problemErrorTypes.map(err => {
+                const partialIdentityRows = currentTableProbability.filter(row => {
+                    return row[err] === "partialIdentity";
+                })
+                let otherspartialIdentityRows = []; //除了遍歷當下的其他err
+                problemErrorTypes.forEach(othersErr => {
+                    if (othersErr !== err) {
+                        otherspartialIdentityRows.push(othersErr);
+                    }
+                })
+                const updatedpartialIdentityRows = partialIdentityRows.map(row => {
+                    const updatedRow = { ...row }; // 複製原始物件
+                    otherspartialIdentityRows.forEach(othersErr => {
+                        const errType = updatedRow[othersErr];
+                        updatedRow[othersErr] = errorTypesFamiliarity[othersErr.split("B0")[1] - 1][errType];
+                    });
+                    return updatedRow;
+                });
+
+                sum = 0;
+                updatedpartialIdentityRows.forEach(row => {
+                    delete row.totalCorrectRate;
+                    Object.values(row).forEach(num => {
+                        if (typeof num === "number") {
+                            product *= num;
+                        }
+                    })
+                    sum += product; // 將每次計算的結果加到總和中
+                    product = 1; // 重置 product 為 1，以便下一次迭代
+                })
+                console.log(sum)
+                return sum;
+            })
+
+            //fullIdentity
+            const fullIdentity1arg = problemErrorTypes.map(err => {
+                const fullIdentityRows = currentTableProbability.filter(row => {
+                    return row[err] === "fullIdentity";
+                })
+                let othersfullIdentityRows = []; //除了遍歷當下的其他err
+                problemErrorTypes.forEach(othersErr => {
+                    if (othersErr !== err) {
+                        othersfullIdentityRows.push(othersErr);
+                    }
+                })
+                const updatedfullIdentityRows = fullIdentityRows.map(row => {
+                    const updatedRow = { ...row }; // 複製原始物件
+                    othersfullIdentityRows.forEach(othersErr => {
+                        const errType = updatedRow[othersErr];
+                        updatedRow[othersErr] = errorTypesFamiliarity[othersErr.split("B0")[1] - 1][errType];
+                    });
+                    return updatedRow;
+                });
+
+                sum = 0;
+                updatedfullIdentityRows.forEach(row => {
+                    delete row.totalCorrectRate;
+                    Object.values(row).forEach(num => {
+                        if (typeof num === "number") {
+                            product *= num;
+                        }
+                    })
+                    sum += product; // 將每次計算的結果加到總和中
+                    product = 1; // 重置 product 為 1，以便下一次迭代
+                })
+                console.log(sum)
+                return sum;
+            })
+
+            // 計算&更新
             let index = -1;
             problemErrorTypes.forEach(err => {
                 index++;
                 const newNoIdentity = (noIdentity1arg[index] * errorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity) / problemProbability[currentProblem - 2].wrong || 1;
-                console.log(`sum: ` + noIdentity1arg[index]);
-                console.log(`noIdentity: ` + errorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity);
-                console.log(`相乘:` + noIdentity1arg[index] * errorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity);
+                const newPartialIdentity = (partialIdentity1arg[index] * errorTypesFamiliarity[err.split("B0")[1] - 1].partialIdentity) / problemProbability[currentProblem - 2].wrong || 1;
+                const newFullIdentity = (fullIdentity1arg[index] * errorTypesFamiliarity[err.split("B0")[1] - 1].fullIdentity) / problemProbability[currentProblem - 2].wrong || 1;
                 const updatedErrorTypesFamiliarity = [...errorTypesFamiliarity];
                 updatedErrorTypesFamiliarity[err.split("B0")[1] - 1].noIdentity = newNoIdentity;
+                updatedErrorTypesFamiliarity[err.split("B0")[1] - 1].partialIdentity = newPartialIdentity;
+                updatedErrorTypesFamiliarity[err.split("B0")[1] - 1].fullIdentity = newFullIdentity;
                 setErrorTypesFamiliarity(updatedErrorTypesFamiliarity);
             })
 
