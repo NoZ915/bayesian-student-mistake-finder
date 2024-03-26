@@ -14,7 +14,6 @@ import Problem from "../components/Problem";
 import ErrorTypesFamiliarity from "../components/ErrorTypesFamiliarity";
 import { updatedCombinationsAccuracy, problemErrorType } from "../utils/tableProbability";
 import { useState, useEffect } from "react";
-import { forEach } from "async";
 
 const containerStyle = {
     mt: 2,
@@ -61,7 +60,6 @@ function ProblemPage() {
     }, [currentProblem]);
     useEffect(() => {
         if (selectedErrorType) {
-            updateProblem();
             update(selectedErrorType);
         }
     }, [selectedErrorType])
@@ -108,16 +106,6 @@ function ProblemPage() {
             wrong: 0.5
         }))
     )
-    function updateProblem() {
-        if (Number(selectedErrorType.split('-')[1]) === 0) {
-
-        } else {
-
-        }
-
-        const updatedProblemProbability = [...problemProbability];
-        // updatedProblemProbability[currentProblem - 2].correct = 
-    }
 
     // 根據使用者選擇的error type各個情況機率以及題目正確錯誤率做更新
     function update(selectedErrorType) {
@@ -191,7 +179,6 @@ function ProblemPage() {
                     sum += product; // 將每次計算的結果加到總和中
                     product = 1; // 重置 product 為 1，以便下一次迭代
                 })
-                console.log(sum)
                 return sum;
             })
 
@@ -226,7 +213,6 @@ function ProblemPage() {
                     sum += product; // 將每次計算的結果加到總和中
                     product = 1; // 重置 product 為 1，以便下一次迭代
                 })
-                console.log(sum)
                 return sum;
             })
 
@@ -244,6 +230,37 @@ function ProblemPage() {
                 setErrorTypesFamiliarity(updatedErrorTypesFamiliarity);
             })
 
+            // 題目正確/錯誤率計算
+
+            if (currentProblem - 1 < problems.length) {
+                const nextTableProbability = updatedCombinationsAccuracy[currentProblem - 1].combinationsAccuracy;
+                const nextProblemErrorTypes = problemErrorType(problems[currentProblem - 1]);
+                let updatedNextTableProbability = nextTableProbability.map(row => ({ ...row })); // 創建一個新的陣列，包含每個row的複本
+                nextProblemErrorTypes.forEach(err => {
+                    updatedNextTableProbability.forEach(updatedRow => {
+                        const errType = updatedRow[err];
+                        updatedRow[err] = errorTypesFamiliarity[err.split("B0")[1] - 1][errType];
+                    });
+                    return updatedNextTableProbability;
+                })
+                sum = 0;
+                updatedNextTableProbability.forEach(row => {
+                    delete row.totalCorrectRate;
+                    Object.values(row).forEach(num => {
+                        if (typeof num === "number") {
+                            product *= num;
+                        }
+                    })
+                    sum += product; // 將每次計算的結果加到總和中
+                    product = 1; // 重置 product 為 1，以便下一次迭代
+                })
+                let wrongRate = sum;
+                let correctRate = 1 - wrongRate;
+                const updatedProblemProbability = [...problemProbability];
+                updatedProblemProbability[currentProblem - 1].correct = correctRate;
+                updatedProblemProbability[currentProblem - 1].wrong = wrongRate;
+                setProblemProbability(updatedProblemProbability);
+            }
         }
     }
 

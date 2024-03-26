@@ -42,12 +42,38 @@ const problems = [
             {   
                 name: "C",
                 text: "is watching",
-                errorType: 1
+                errorType: 4
             },
             {   
                 name: "D",
                 text: "watches",
                 errorType: 0
+            }
+        ]
+    },
+    {
+        problemNumber: 3,
+        description: "Ella gets up early and _______ English hard.",
+        options: [
+            {   
+                name: "A",
+                text: "studys",
+                errorType: 3
+            },
+            {   
+                name: "B",
+                text: "studies",
+                errorType: 0
+            },
+            {   
+                name: "C",
+                text: "studied",
+                errorType: 4
+            },
+            {   
+                name: "D",
+                text: "is studying",
+                errorType: 4
             }
         ]
     }
