@@ -47,15 +47,17 @@ function ErrorTypesFamiliarity({ errorTypesFamiliarity }) {
         )
     })
 
-    let data = [];
     const renderedChartData = errorTypesFamiliarity.map((errorTypeFamiliarity, index) => {
+        return index
+    })
+
+    const renderedChartValue = errorTypesFamiliarity.map((errorTypeFamiliarity, index) => {
         const noIdentity = Math.round(errorTypeFamiliarity.noIdentity * 10000) / 100;
         const partialIdentity = Math.round(errorTypeFamiliarity.partialIdentity * 10000) / 100;
         const fullIdentity = Math.round(errorTypeFamiliarity.fullIdentity * 10000) / 100;
-        data.push(`B0${index + 1}`)
-        return data
+
+        return { data: [noIdentity, partialIdentity, fullIdentity] }
     })
-    console.log(renderedChartData)
 
     return (
         <Container>
@@ -63,8 +65,8 @@ function ErrorTypesFamiliarity({ errorTypesFamiliarity }) {
                 {renderedErrorType}
             </Grid>
             <BarChart
-                yAxis={[{ scaleType: 'band', data: renderedChartData[0] }]}
-                series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}
+                yAxis={[{ scaleType: 'band', data: renderedChartData }]}
+                series={renderedChartValue}
                 width={500}
                 height={300}
                 layout="horizontal"
